@@ -43,6 +43,16 @@ Integrated Windows Authentication, IE will attempt to construct a SPN
 based upon resolving the hostname to an A record. Hence to avoid
 problems, do not use CNAMEs for your DNS records.
 
+Request Header Limitations
+--------------------------
+
+Some web server components including Zope's own ZServer impose
+limitations on the request and response header lengths.
+
+When using SSO it's recommended to increase ``http-header-max-length``
+to 16384.
+
+
 Service Principal Names (SPNs) and Keytabs
 ------------------------------------------
 
