@@ -1,6 +1,11 @@
 2.3.2 (unreleased)
 ------------------
 
+- Fix support for subrequest authentication. The credentials must be
+  cached on the parent request because the authorization ticket is
+  only valid during a limited time window.
+  [malthe]
+
 - Allow PAS plugin loading to continue in debug mode (development) with an error warning if the kerberos library cannot be loaded on unix.
   [fredvd]
 

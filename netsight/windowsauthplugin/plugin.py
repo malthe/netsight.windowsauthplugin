@@ -11,6 +11,7 @@ from Products.PluggableAuthService.utils import classImplements
 
 from zExceptions import Forbidden
 from zLOG import LOG, ERROR, DEBUG, INFO
+from zope.annotation.interfaces import IAnnotations
 
 import sys
 import urlparse
@@ -33,6 +34,9 @@ else:
             raise
 
 import interface
+
+KEY = "netsight.windowsauthplugin.credentials"
+
 
 class WindowsauthpluginHelper( BasePlugin ):
     """Multi-plugin to do Kerberos based SSO
@@ -94,14 +98,18 @@ class WindowsauthpluginHelper( BasePlugin ):
             return None
 
         request = self.REQUEST
+
+        # This request may be a subrequest which is supposed to
+        # leverage the same authentication information as the parent
+        # request.
+        request = request.get('PARENT_REQUEST', request)
+        cache = IAnnotations(request)
+        value = cache.get(KEY)
+        if value is not None:
+            return value
+
         response = request.RESPONSE
         remote_host = request.getClientAddr()
-
-        # We are actually already authenticated... maybe we are in a subrequest
-        if request.get('AUTHENTICATED_USER', None) is not None:
-            username = request.AUTHENTICATED_USER.getName()
-            return username, username
-
         ticket = credentials['ticket']
 
         if WINDOWS:
@@ -155,7 +163,8 @@ class WindowsauthpluginHelper( BasePlugin ):
             response = request.RESPONSE
             pas_instance.updateCredentials(request, response, username, '')
 
-        return username, username
+        value = cache[KEY] = username, username
+        return value
 
 
     security.declarePrivate( 'extractCredentials' )
